@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -13,10 +14,9 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -56,51 +56,56 @@ public class Main extends Application {
             mainWindow.close();
         mainWindow = stage;
 
+        Parent root = getRootParent();
+
+        stage.setScene(new Scene(root));
+        stage.setTitle("JavaScript Canvas Painter");
+        stage.show();
+    }
+
+    private Parent getRootParent() {
         VBox root = new VBox();
         // VBox row 0
+        // Menu Bar
         MenuBar menuBar = new MenuBar();
 
         Menu fileMenu = new Menu("File");
+        
+        MenuItem newCanvasMenuItem = new MenuItem("New Canvas");
+        newCanvasMenuItem.setOnAction(this::promptForCanvasSize);
+        
+        fileMenu.getItems().addAll(newCanvasMenuItem);
 
         menuBar.getMenus().addAll(fileMenu);
 
         // VBox row 1
-        // Main Pane
-        SplitPane mainPane = new SplitPane();
-        VBox.setVgrow(mainPane, Priority.ALWAYS);
+        // Control Pane
+        HBox controlPane = new HBox();
         
+        GridPane shapesPane = new GridPane();
+        
+        controlPane.getChildren().addAll(shapesPane);
+
+        // VBox row 2
         // Canvas Pane
         ScrollPane mainCanvasPane = new ScrollPane();
+        VBox.setVgrow(mainCanvasPane, Priority.ALWAYS);
         CanvasPane canvasPane = new CanvasPane(width, height);
         mainCanvasPane.setPadding(new Insets(5.0));
         mainCanvasPane.setContent(canvasPane);
 
-        // Control Pane
-        GridPane controlPane = new GridPane();
-        Button newButton = new Button("New Canvas");
-        newButton.setOnAction(this::promptForCanvasSize);
-        controlPane.add(newButton, 0, 0);
-
-        // Details Pane
-        GridPane detailsPane = new GridPane();
-
-        // add elements to main pane (SplitPane)
-        mainPane.getItems().addAll(controlPane, mainCanvasPane, detailsPane);
-        mainPane.setDividerPositions(0.2, 0.8);
-
-        // VBox row 2
+        // VBox row 3
+        // Status Bar
         HBox statusBar = new HBox();
 
         Label status = new Label("Ready");
         statusBar.getChildren().add(status);
 
         // add elements to VBox
-        root.getChildren().addAll(menuBar, mainPane, statusBar);
+        root.getChildren().addAll(menuBar, controlPane, mainCanvasPane, statusBar);
         root.setPrefSize(1000.0, 600.0);
 
-        stage.setScene(new Scene(root));
-        stage.setTitle("JavaScript Canvas Painter");
-        stage.show();
+        return root;
     }
 
     /**
