@@ -4,23 +4,30 @@ import java.util.Optional;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -67,45 +74,87 @@ public class Main extends Application {
         VBox root = new VBox();
         // VBox row 0
         // Menu Bar
-        MenuBar menuBar = new MenuBar();
-
-        Menu fileMenu = new Menu("File");
-        
-        MenuItem newCanvasMenuItem = new MenuItem("New Canvas");
-        newCanvasMenuItem.setOnAction(this::promptForCanvasSize);
-        
-        fileMenu.getItems().addAll(newCanvasMenuItem);
-
-        menuBar.getMenus().addAll(fileMenu);
+        MenuBar menuBar = this.getMenuBar();
 
         // VBox row 1
         // Control Pane
         HBox controlPane = new HBox();
-        
-        GridPane shapesPane = new GridPane();
-        
-        controlPane.getChildren().addAll(shapesPane);
+        controlPane.setPadding(new Insets(10.0));
+        controlPane.setSpacing(10.0);
+
+        ColorPicker colorPicker = new ColorPicker(Color.BLACK);
+
+        ComboBox<String> shapePicker = this.getShapesPicker();
+
+        controlPane.getChildren().addAll(shapePicker, colorPicker);
 
         // VBox row 2
         // Canvas Pane
         ScrollPane mainCanvasPane = new ScrollPane();
-        VBox.setVgrow(mainCanvasPane, Priority.ALWAYS);
-        CanvasPane canvasPane = new CanvasPane(width, height);
         mainCanvasPane.setPadding(new Insets(5.0));
+        VBox.setVgrow(mainCanvasPane, Priority.ALWAYS);
+
+        CanvasPane canvasPane = new CanvasPane(width, height);
+        
         mainCanvasPane.setContent(canvasPane);
 
         // VBox row 3
         // Status Bar
         HBox statusBar = new HBox();
+        statusBar.setSpacing(5.0);
 
-        Label status = new Label("Ready");
-        statusBar.getChildren().add(status);
+        Separator separator1 = new Separator();
+        separator1.setOrientation(Orientation.VERTICAL);
+
+        Separator separator2 = new Separator();
+        separator2.setOrientation(Orientation.VERTICAL);
+
+        Label cursorPositionLabel = new Label("Cursor Position: ");
+        cursorPositionLabel.setMinWidth(150.0);
+        Label canvasSizeLabel = new Label("Canvas size: " + width + " x " + height + "px");
+        canvasSizeLabel.setMinWidth(100.0);
+
+        statusBar.getChildren().addAll(cursorPositionLabel, separator1, canvasSizeLabel, separator2);
 
         // add elements to VBox
         root.getChildren().addAll(menuBar, controlPane, mainCanvasPane, statusBar);
         root.setPrefSize(1000.0, 600.0);
 
+        canvasPane.setCursorPositionLabel(cursorPositionLabel);
+        canvasPane.setColorPicker(colorPicker);
+        canvasPane.setShapePicker(shapePicker);
+        
         return root;
+    }
+
+    private MenuBar getMenuBar() {
+        MenuBar menuBar = new MenuBar();
+
+        // Menu Tab - File
+        Menu fileMenu = new Menu("File");
+
+        // Menu Item for menu tab - File
+        MenuItem newCanvasMenuItem = new MenuItem("New Canvas");
+        newCanvasMenuItem.setOnAction(this::promptForCanvasSize);
+
+        // Add items to menu tab - File
+        fileMenu.getItems().addAll(newCanvasMenuItem);
+
+        // Add tabs to menu bar
+        menuBar.getMenus().addAll(fileMenu);
+
+        return menuBar;
+    }
+
+    private ComboBox<String> getShapesPicker() {
+        ObservableList<String> options = FXCollections.observableArrayList();
+        ComboBox<String> shapesPicker = new ComboBox<>(options);
+
+        options.addAll("Line", "Rectangle");
+
+        shapesPicker.getSelectionModel().selectFirst();
+
+        return shapesPicker;
     }
 
     /**
