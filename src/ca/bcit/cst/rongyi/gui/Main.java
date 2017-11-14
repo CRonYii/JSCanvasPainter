@@ -23,6 +23,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Slider;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -115,13 +116,23 @@ public class Main extends Application {
 
         // VBox row 2
         // Canvas Pane
+        SplitPane middleCanvasPane = new SplitPane();
+        
+        // Main Canvas
         ScrollPane mainCanvasPane = new ScrollPane();
         mainCanvasPane.setPadding(new Insets(5.0));
-        VBox.setVgrow(mainCanvasPane, Priority.ALWAYS);
+        VBox.setVgrow(middleCanvasPane, Priority.ALWAYS);
 
         canvasPane = new CanvasPane(canvasWidth, canvasHeight);
 
         mainCanvasPane.setContent(canvasPane);
+        
+        // Details Pane
+        DetailsPane detailsPane = new DetailsPane(canvasPane);
+        
+        // add elements 
+        middleCanvasPane.getItems().addAll(mainCanvasPane, detailsPane);
+        middleCanvasPane.setDividerPositions(0.7);
 
         // VBox row 3
         // Status Bar
@@ -142,7 +153,7 @@ public class Main extends Application {
         statusBar.getChildren().addAll(cursorPositionLabel, separator1, canvasSizeLabel, separator2);
 
         // add elements to VBox
-        root.getChildren().addAll(menuBar, controlPane, mainCanvasPane, statusBar);
+        root.getChildren().addAll(menuBar, controlPane, middleCanvasPane, statusBar);
         root.setPrefSize(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
 
         canvasPane.setCursorPositionLabel(cursorPositionLabel);
@@ -150,7 +161,7 @@ public class Main extends Application {
         canvasPane.setStrokeColorPicker(strokeColorPicker);
         canvasPane.setStrokeWidthPicker(strokeWidthPicker);
         canvasPane.setShapePicker(shapePicker);
-
+        
         return root;
     }
 
