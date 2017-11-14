@@ -29,7 +29,7 @@ public class CanvasPane extends AnchorPane {
     private ColorPicker strokeColorPicker;
     private Slider strokeWidthPicker;
 
-    private int cursorStartX, cursorStartY;
+    private double cursorStartX, cursorStartY;
 
     /**
      * Constructs an object of type CanvasPane.
@@ -90,8 +90,8 @@ public class CanvasPane extends AnchorPane {
     }
 
     private void setCursorStartPos(MouseEvent event) {
-        cursorStartX = (int) event.getX();
-        cursorStartY = (int) event.getY();
+        cursorStartX = event.getX();
+        cursorStartY = event.getY();
     }
 
     /**
@@ -154,8 +154,6 @@ public class CanvasPane extends AnchorPane {
     public void setStrokeWidthPicker(Slider strokeWidthPicker) {
         this.strokeWidthPicker = strokeWidthPicker;
     }
-
-    
 
     /**
      * Returns the painter for this CanvasPane.

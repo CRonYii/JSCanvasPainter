@@ -1,8 +1,8 @@
 package ca.bcit.cst.rongyi.painter;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -22,8 +22,8 @@ public class Painter {
     private GraphicsContext context;
 
     private Shape tempShape;
-
-    private List<Shape> shapeList = new ArrayList<>();
+    
+    private ObservableList<Shape> shapeList;
 
     /**
      * Constructs an object of type Painter.
@@ -33,6 +33,16 @@ public class Painter {
     public Painter(Canvas canvas) {
         this.canvas = canvas;
         this.context = canvas.getGraphicsContext2D();
+        
+        shapeList = FXCollections.observableArrayList();
+        shapeList.addListener(new ListChangeListener<Shape>() {
+
+            @Override
+            public void onChanged(Change<? extends Shape> c) {
+                paint();
+            }
+
+        });
     }
 
     /**
@@ -95,7 +105,6 @@ public class Painter {
 
     public void addShape(Shape shape) {
         this.shapeList.add(shape);
-        this.paint();
     }
 
     /**
@@ -140,6 +149,14 @@ public class Painter {
 
     public void generateJS() {
         JSGenerator.generateJS(shapeList);
+    }
+
+    /**
+     * Returns the shapeList for this Painter.
+     * @return the shapeList
+     */
+    public ObservableList<Shape> getShapeList() {
+        return shapeList;
     }
     
     

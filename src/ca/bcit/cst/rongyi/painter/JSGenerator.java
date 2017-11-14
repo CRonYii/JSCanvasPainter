@@ -34,7 +34,7 @@ public class JSGenerator {
                 "context.stroke();\n";
     }
     
-    private static String getJSColorCode(Paint paint) {
+    public static String getJSColorCode(Paint paint) {
         String paintCode = paint.toString();
         return "#" + paintCode.substring(2, paintCode.length() - 2);
     }
