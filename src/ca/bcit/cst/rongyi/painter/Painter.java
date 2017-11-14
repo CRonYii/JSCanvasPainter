@@ -75,20 +75,22 @@ public class Painter {
     }
 
     private void paintLine(Line shape) {
-        context.setFill(shape.getFill());
         context.setStroke(shape.getStroke());
+        context.setLineWidth(shape.getStrokeWidth());
         context.strokeLine(shape.getStartX(), shape.getStartY(), shape.getEndX(), shape.getEndY());
     }
 
     /**
      * Paint rectangle using canvas.
      * 
-     * @param rect
+     * @param shape
      */
-    private void paintRect(Rectangle rect) {
-        context.setFill(rect.getFill());
-        context.setStroke(rect.getStroke());
-        context.fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    private void paintRect(Rectangle shape) {
+        context.setFill(shape.getFill());
+        context.setStroke(shape.getStroke());
+        context.setLineWidth(shape.getStrokeWidth());
+        context.fillRect(shape.getX(), shape.getY(), shape.getWidth(), shape.getHeight());
+        context.strokeRect(shape.getX(), shape.getY(), shape.getWidth(), shape.getHeight());
     }
 
     public void addShape(Shape shape) {
@@ -135,4 +137,10 @@ public class Painter {
         this.addShape(tempShape);
         tempShape = null;
     }
+
+    public void generateJS() {
+        JSGenerator.generateJS(shapeList);
+    }
+    
+    
 }

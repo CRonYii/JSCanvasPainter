@@ -22,6 +22,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -38,10 +39,14 @@ import javafx.util.Pair;
  * @version 2017
  */
 public class Main extends Application {
+    private final static double MIN_WINDOW_WIDTH = 900.0;
+    private final static double MIN_WINDOW_HEIGHT = 700.0;
+    
     private Stage mainWindow;
+    private CanvasPane canvasPane;
 
-    private int width = 500;
-    private int height = 500;
+    private int canvasWidth = 500;
+    private int canvasHeight = 500;
 
     /**
      * @see javafx.application.Application#start(javafx.stage.Stage)
@@ -64,7 +69,9 @@ public class Main extends Application {
         mainWindow = stage;
 
         Parent root = getRootParent();
-
+        
+        stage.setMinWidth(MIN_WINDOW_WIDTH);
+        stage.setMinHeight(MIN_WINDOW_HEIGHT);
         stage.setScene(new Scene(root));
         stage.setTitle("JavaScript Canvas Painter");
         stage.show();
@@ -82,11 +89,29 @@ public class Main extends Application {
         controlPane.setPadding(new Insets(10.0));
         controlPane.setSpacing(10.0);
 
-        ColorPicker colorPicker = new ColorPicker(Color.BLACK);
-
+        // Shape Picker
+        Label shapeLabel = new Label("Shape: ");
         ComboBox<String> shapePicker = this.getShapesPicker();
+        // Fill Color Picker
+        Label fillColorLabel = new Label("Fill Color: ");
+        ColorPicker fillColorPicker = new ColorPicker(Color.web("#FFFFFF", 0.0));
 
-        controlPane.getChildren().addAll(shapePicker, colorPicker);
+        // Fill Color Picker
+        Label strokeColorLabel = new Label("Stroke Color: ");
+        ColorPicker strokeColorPicker = new ColorPicker(Color.BLACK);
+        
+        // Stroke Width Picker
+        Label strokeWidthLabel = new Label("Stroke Width: ");
+        Label strokeWidthValueLabel = new Label("1px");
+        Slider strokeWidthPicker = new Slider(0.0, 100.0, 1.0);
+        strokeWidthPicker.setBlockIncrement(1.0);
+        strokeWidthPicker.valueProperty().addListener(listener -> {
+            strokeWidthValueLabel.setText((int) strokeWidthPicker.getValue() + "px");
+        });
+        strokeWidthPicker.setShowTickMarks(true);
+        
+        controlPane.getChildren().addAll(shapeLabel, shapePicker, fillColorLabel, fillColorPicker, strokeColorLabel,
+                strokeColorPicker, strokeWidthLabel, strokeWidthPicker, strokeWidthValueLabel);
 
         // VBox row 2
         // Canvas Pane
@@ -94,8 +119,8 @@ public class Main extends Application {
         mainCanvasPane.setPadding(new Insets(5.0));
         VBox.setVgrow(mainCanvasPane, Priority.ALWAYS);
 
-        CanvasPane canvasPane = new CanvasPane(width, height);
-        
+        canvasPane = new CanvasPane(canvasWidth, canvasHeight);
+
         mainCanvasPane.setContent(canvasPane);
 
         // VBox row 3
@@ -111,19 +136,21 @@ public class Main extends Application {
 
         Label cursorPositionLabel = new Label("Cursor Position: ");
         cursorPositionLabel.setMinWidth(150.0);
-        Label canvasSizeLabel = new Label("Canvas size: " + width + " x " + height + "px");
+        Label canvasSizeLabel = new Label("Canvas size: " + canvasWidth + " x " + canvasHeight + "px");
         canvasSizeLabel.setMinWidth(100.0);
 
         statusBar.getChildren().addAll(cursorPositionLabel, separator1, canvasSizeLabel, separator2);
 
         // add elements to VBox
         root.getChildren().addAll(menuBar, controlPane, mainCanvasPane, statusBar);
-        root.setPrefSize(1000.0, 600.0);
+        root.setPrefSize(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
 
         canvasPane.setCursorPositionLabel(cursorPositionLabel);
-        canvasPane.setColorPicker(colorPicker);
+        canvasPane.setFillColorPicker(fillColorPicker);
+        canvasPane.setStrokeColorPicker(strokeColorPicker);
+        canvasPane.setStrokeWidthPicker(strokeWidthPicker);
         canvasPane.setShapePicker(shapePicker);
-        
+
         return root;
     }
 
@@ -137,8 +164,11 @@ public class Main extends Application {
         MenuItem newCanvasMenuItem = new MenuItem("New Canvas");
         newCanvasMenuItem.setOnAction(this::promptForCanvasSize);
 
+        MenuItem generateJSMenuItem = new MenuItem("Generate JavaScript");
+        generateJSMenuItem.setOnAction(this::generateJS);
+
         // Add items to menu tab - File
-        fileMenu.getItems().addAll(newCanvasMenuItem);
+        fileMenu.getItems().addAll(newCanvasMenuItem, generateJSMenuItem);
 
         // Add tabs to menu bar
         menuBar.getMenus().addAll(fileMenu);
@@ -155,6 +185,10 @@ public class Main extends Application {
         shapesPicker.getSelectionModel().selectFirst();
 
         return shapesPicker;
+    }
+
+    private void generateJS(ActionEvent event) {
+        canvasPane.getPainter().generateJS();
     }
 
     /**
@@ -212,8 +246,8 @@ public class Main extends Application {
         Optional<Pair<String, String>> result = dialog.showAndWait();
 
         result.ifPresent(pair -> {
-            this.width = Integer.parseInt(pair.getKey());
-            this.height = Integer.parseInt(pair.getValue());
+            this.canvasWidth = Integer.parseInt(pair.getKey());
+            this.canvasHeight = Integer.parseInt(pair.getValue());
 
             try {
                 this.startMainWindow(new Stage());
