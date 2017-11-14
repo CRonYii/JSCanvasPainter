@@ -21,7 +21,8 @@ public class JSGenerator {
                 Line line = (Line) shape;
                 js += getJSLine(line);
             } else if (shape instanceof Rectangle) {
-                
+                Rectangle rect = (Rectangle) shape;
+                js += getJSRect(rect);
             }
         }
         System.out.println(js);
@@ -31,7 +32,17 @@ public class JSGenerator {
         return "\ncontext.strokeStyle = \"" + getJSColorCode(shape.getStroke()) + "\";\n" +
                 "context.moveTo(" +  shape.getStartX() + ", " + shape.getStartY() + ");\n" + 
                 "context.lineTo(" + shape.getEndX() + ", " + shape.getEndY() + ");\n" + 
+                "context.lineWidth = " + shape.getStrokeWidth() + ";\n" +
                 "context.stroke();\n";
+    }
+    
+    private static String getJSRect(Rectangle shape) {
+        return "\ncontext.strokeStyle = \"" + getJSColorCode(shape.getStroke()) + "\";\n" +
+                "context.fillStyle = \"" + getJSColorCode(shape.getFill()) + "\";\n" +
+                "context.lineWidth = " + shape.getStrokeWidth() + ";\n" +
+                "context.fillRect(" + shape.getX() + ", " + shape.getY() + ", " + shape.getWidth() + ", " + shape.getHeight() + ");\n" +
+                "context.strokeRect(" + shape.getX() + ", " + shape.getY() + ", " + shape.getWidth() + ", " + shape.getHeight() + ");\n";
+                
     }
     
     public static String getJSColorCode(Paint paint) {
