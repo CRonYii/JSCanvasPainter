@@ -155,6 +155,23 @@ public class Painter {
     public ObservableList<Shape> getShapeList() {
         return shapeList;
     }
+
+    /**
+     * Sets the shapeList for this Painter.
+     * @param shapeList the shapeList to set
+     */
+    public void setShapeList(ObservableList<Shape> shapeList) {
+        this.shapeList = shapeList;
+        shapeList.addListener(new ListChangeListener<Shape>() {
+
+            @Override
+            public void onChanged(Change<? extends Shape> c) {
+                paint();
+            }
+
+        });
+        this.paint();
+    }
     
     
 }
