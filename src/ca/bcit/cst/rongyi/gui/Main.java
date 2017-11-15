@@ -1,7 +1,10 @@
 package ca.bcit.cst.rongyi.gui;
 
+import java.io.File;
 import java.util.Optional;
 
+import ca.bcit.cst.rongyi.painter.PaintIO;
+import ca.bcit.cst.rongyi.painter.PaintIO.PaintData;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -30,6 +33,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -42,9 +47,10 @@ import javafx.util.Pair;
 public class Main extends Application {
     private final static double MIN_WINDOW_WIDTH = 900.0;
     private final static double MIN_WINDOW_HEIGHT = 700.0;
-    
+
     private Stage mainWindow;
     private CanvasPane canvasPane;
+    private DetailsPane detailsPane;
 
     private int canvasWidth = 500;
     private int canvasHeight = 500;
@@ -70,7 +76,7 @@ public class Main extends Application {
         mainWindow = stage;
 
         Parent root = getRootParent();
-        
+
         stage.setMinWidth(MIN_WINDOW_WIDTH);
         stage.setMinHeight(MIN_WINDOW_HEIGHT);
         stage.setScene(new Scene(root));
@@ -100,7 +106,7 @@ public class Main extends Application {
         // Fill Color Picker
         Label strokeColorLabel = new Label("Stroke Color: ");
         ColorPicker strokeColorPicker = new ColorPicker(Color.BLACK);
-        
+
         // Stroke Width Picker
         Label strokeWidthLabel = new Label("Stroke Width: ");
         Label strokeWidthValueLabel = new Label("1px");
@@ -110,14 +116,14 @@ public class Main extends Application {
             strokeWidthValueLabel.setText((int) strokeWidthPicker.getValue() + "px");
         });
         strokeWidthPicker.setShowTickMarks(true);
-        
+
         controlPane.getChildren().addAll(shapeLabel, shapePicker, fillColorLabel, fillColorPicker, strokeColorLabel,
                 strokeColorPicker, strokeWidthLabel, strokeWidthPicker, strokeWidthValueLabel);
 
         // VBox row 2
         // Canvas Pane
         SplitPane middleCanvasPane = new SplitPane();
-        
+
         // Main Canvas
         ScrollPane mainCanvasPane = new ScrollPane();
         mainCanvasPane.setPadding(new Insets(5.0));
@@ -126,11 +132,11 @@ public class Main extends Application {
         canvasPane = new CanvasPane(canvasWidth, canvasHeight);
 
         mainCanvasPane.setContent(canvasPane);
-        
+
         // Details Pane
-        DetailsPane detailsPane = new DetailsPane(canvasPane);
-        
-        // add elements 
+        detailsPane = new DetailsPane(canvasPane);
+
+        // add elements
         middleCanvasPane.getItems().addAll(mainCanvasPane, detailsPane);
         middleCanvasPane.setDividerPositions(0.7);
 
@@ -161,7 +167,7 @@ public class Main extends Application {
         canvasPane.setStrokeColorPicker(strokeColorPicker);
         canvasPane.setStrokeWidthPicker(strokeWidthPicker);
         canvasPane.setShapePicker(shapePicker);
-        
+
         return root;
     }
 
@@ -174,12 +180,18 @@ public class Main extends Application {
         // Menu Item for menu tab - File
         MenuItem newCanvasMenuItem = new MenuItem("New Canvas");
         newCanvasMenuItem.setOnAction(this::promptForCanvasSize);
+        
+        MenuItem saveAsXMLMenuItem = new MenuItem("Save As XML");
+        saveAsXMLMenuItem.setOnAction(this::actionSaveAsXML);
+        
+        MenuItem readeFromFileMenuItem = new MenuItem("Read From File");
+        readeFromFileMenuItem.setOnAction(this::actionReadFromFile);
 
-        MenuItem generateJSMenuItem = new MenuItem("Generate JavaScript");
-        generateJSMenuItem.setOnAction(this::generateJS);
+        MenuItem exportAsHTMLMenuItem = new MenuItem("Export As HTML");
+        exportAsHTMLMenuItem.setOnAction(this::actionExportAsHTML);
 
         // Add items to menu tab - File
-        fileMenu.getItems().addAll(newCanvasMenuItem, generateJSMenuItem);
+        fileMenu.getItems().addAll(newCanvasMenuItem, saveAsXMLMenuItem, readeFromFileMenuItem, exportAsHTMLMenuItem);
 
         // Add tabs to menu bar
         menuBar.getMenus().addAll(fileMenu);
@@ -198,8 +210,16 @@ public class Main extends Application {
         return shapesPicker;
     }
 
-    private void generateJS(ActionEvent event) {
-        canvasPane.getPainter().generateJS();
+    private void actionExportAsHTML(ActionEvent event) {
+        promptForFileName();
+    }
+    
+    private void actionSaveAsXML(ActionEvent event) {
+        promptForSaveFile();
+    }
+    
+    private void actionReadFromFile(ActionEvent event) {
+        promptForReadFile();
     }
 
     /**
@@ -267,6 +287,49 @@ public class Main extends Application {
                 e.printStackTrace();
             }
         });
+    }
+
+    /**
+     * Prompt a dialog to ask for location to export as HTML.
+     * after submit.
+     */
+    private void promptForFileName() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export As HTML");
+        fileChooser.getExtensionFilters().addAll(new ExtensionFilter("HTML", "*.html"));
+        File selectedFile = fileChooser.showSaveDialog(new Stage());
+        PaintIO.saveAsHTML(selectedFile, canvasPane.getPainter());
+    }
+    
+    /**
+     * Prompt a dialog to ask for location to save file.
+     * after submit.
+     */
+    private void promptForSaveFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save As XML");
+        fileChooser.getExtensionFilters().addAll(new ExtensionFilter("XML", "*.xml"));
+        File selectedFile = fileChooser.showSaveDialog(new Stage());
+        PaintIO.saveAsXML(selectedFile, canvasPane.getPainter());
+    }
+    
+    /**
+     * Prompt a dialog to ask for location to read file.
+     * after submit.
+     */
+    private void promptForReadFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open From File");
+        fileChooser.getExtensionFilters().addAll(new ExtensionFilter("XML", "*.xml"));
+        File selectedFile = fileChooser.showOpenDialog(new Stage());
+        
+        PaintData data = PaintIO.readFromFile(selectedFile);
+        this.canvasWidth = data.getWidth();
+        this.canvasHeight = data.getHeight();
+        mainWindow.close();
+        startMainWindow(new Stage());
+        this.canvasPane.getPainter().setShapeList(data.getShapeList());
+        this.detailsPane.updateListView();
     }
 
     /**

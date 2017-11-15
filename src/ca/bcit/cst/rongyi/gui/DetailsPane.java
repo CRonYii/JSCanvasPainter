@@ -174,6 +174,11 @@ public class DetailsPane extends SplitPane {
         return displayBox;
     }
     
+    public void updateListView() {
+        shapeList = canvasPane.getPainter().getShapeList();
+        elementListView.setItems(shapeList);
+    }
+    
     static class ShapeElementCell extends ListCell<Shape> {
         @Override
         public void updateItem(Shape item, boolean empty) {
