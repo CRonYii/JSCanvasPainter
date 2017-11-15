@@ -14,7 +14,7 @@ import javafx.scene.shape.Shape;
  * @version 2017
  */
 public class JSGenerator {
-    public static void generateJS(List<Shape> shapeList) {
+    public static String generateJS(List<Shape> shapeList) {
         String js = "";
         for (Shape shape: shapeList) {
             if (shape instanceof Line) {
@@ -25,7 +25,7 @@ public class JSGenerator {
                 js += getJSRect(rect);
             }
         }
-        System.out.println(js);
+        return js;
     }
     
     private static String getJSLine(Line shape) {

@@ -2,6 +2,7 @@ package ca.bcit.cst.rongyi.gui;
 
 import java.util.Optional;
 
+import ca.bcit.cst.rongyi.painter.PaintIO;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -199,7 +200,7 @@ public class Main extends Application {
     }
 
     private void generateJS(ActionEvent event) {
-        canvasPane.getPainter().generateJS();
+        PaintIO.saveAsHTML(canvasPane.getPainter());
     }
 
     /**
@@ -269,6 +270,57 @@ public class Main extends Application {
         });
     }
 
+    /**
+     * Prompt a dialog to ask for size of canvas, a new canvas window will start
+     * after submit.
+     */
+    private void promptForFileName() {
+        Dialog<String> dialog = new Dialog<>();
+        dialog.setTitle("Enter the name of the html");
+        dialog.setHeaderText("Please enter the file name for the HTML file");
+
+        GridPane pane = new GridPane();
+        pane.setVgap(5.0);
+
+        TextField nameInput = new TextField("canvas");
+
+        pane.add(new Label("Width: "), 0, 0);
+        pane.add(nameInput, 1, 0);
+
+        ButtonType okButtonType = ButtonType.OK;
+        dialog.getDialogPane().getButtonTypes().add(okButtonType);
+//        Button btOk = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+//        btOk.addEventFilter(ActionEvent.ACTION, event -> {
+//            String width = nameInput.getText();
+//            if (!width.matches("^-?\\d+$")) {
+//                event.consume();
+//            }
+//        });
+
+        dialog.getDialogPane().setContent(pane);
+
+        Platform.runLater(() -> nameInput.requestFocus());
+
+        dialog.setResultConverter(button -> {
+            if (button == okButtonType) {
+                return nameInput.getText();
+            }
+            return null;
+        });
+
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(pair -> {
+            String name = result.get();
+            try {
+                this.startMainWindow(new Stage());
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        });
+    }
+    
     /**
      * Drives the program.
      * 

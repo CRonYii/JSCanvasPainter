@@ -35,6 +35,7 @@ public class Painter {
         this.context = canvas.getGraphicsContext2D();
         
         shapeList = FXCollections.observableArrayList();
+        
         shapeList.addListener(new ListChangeListener<Shape>() {
 
             @Override
@@ -145,10 +146,6 @@ public class Painter {
     public void addTempShape() {
         this.addShape(tempShape);
         tempShape = null;
-    }
-
-    public void generateJS() {
-        JSGenerator.generateJS(shapeList);
     }
 
     /**
